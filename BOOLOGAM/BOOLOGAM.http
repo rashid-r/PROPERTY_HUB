@@ -1,0 +1,6 @@
+@BOOLOGAM_HostAddress = http://localhost:5191
+
+GET {{BOOLOGAM_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
