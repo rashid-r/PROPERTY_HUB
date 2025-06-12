@@ -9,49 +9,63 @@ using BOOLOG.Application.Services;
 using BOOLOG.API.Middleware;
 using BOOLOG.Application.Interfaces.ServiceInterfaces;
 using BOOLOG.Application.Repository.RepositoryInterfaces;
-using BOOLOG.Infrastructure.Repository.Repository;
-using BOOLOG.Application.Repository.CategoryRepository;
-using BOOLOG.Infrastructure.Repository.Repository_Services;
-using BOOLOGAM.Infrastructure.Db_Context;
-
+using BOOLOG.Infrastructure.Repository;
+using BOOLOG.Application.Interfaces.RepositoryInterfaces;
+using Microsoft.ML;
+using BOOLOG.Infrastructure.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("defaultconnection")));
-builder.Services.AddTransient(typeof(IRepository<>),typeof(Repository<>));
-builder.Services.AddScoped<IAuth_Service, Auth_Service>();
-builder.Services.AddScoped<IPropertyService, PropertyService>();
-builder.Services.AddScoped<ICategoryServices, CategoryServices>();
-
-
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-
+builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddAutoMapper(typeof(Auto_Mapper));
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            ValidateLifetime = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-        };
-    });
+builder.Services.AddSingleton<MLContext>(); 
+builder.Services.AddScoped<IRecommendationService, RecommendationService>();
+builder.Services.AddScoped<IMLModelRepository, MLModelRepository>();
+
+builder.Services.AddSignalR();
+
+builder.Services.AddScoped<IPropertyService, PropertyService>();
+
+builder.Services.AddScoped<IAuth_Service, Auth_Service>();
+builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
+builder.Services.AddScoped<IPropertyService, PropertyService>();
+builder.Services.AddScoped<ICategoryServices, CategoryServices>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IUserProfileService, UserProfileServices>();
+builder.Services.AddScoped<IUserprofileRepository, UserprofileRepository>();
+builder.Services.AddScoped<IFeedbackServices, FeedbackService>();
+builder.Services.AddScoped<IWishListService, WishListService>();
+builder.Services.AddScoped<IRazorpayService, RazorpayService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                };
+            });
+
 
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("User", policy => policy.RequireRole("User","Admin"));
+    options.AddPolicy("User", policy => policy.RequireRole("User", "Admin"));
 });
-builder.Services.AddControllers();
 
+builder.Services.AddControllers();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -81,7 +95,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -96,9 +109,11 @@ if (app.Environment.IsDevelopment())
 
 //app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<AuthenticationMiddleware>();
+app.MapHub<NotificationHub>("/notificationhub");
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllers();

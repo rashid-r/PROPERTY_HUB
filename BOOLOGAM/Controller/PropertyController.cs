@@ -1,7 +1,10 @@
 using System.Security.Claims;
 using BOOLOG.Application.Dto.PropertyDto;
 using BOOLOG.Application.Interfaces.ServiceInterfaces;
+using BOOLOG.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Nest;
 
 
 namespace BOOLOG.API.Controller
@@ -11,43 +14,125 @@ namespace BOOLOG.API.Controller
     public class PropertyController : ControllerBase
     {
         private readonly IPropertyService _property;
+        private readonly ILogger<PropertyController> _logger;
 
-        public PropertyController(IPropertyService property)
+        public PropertyController(IPropertyService property , ILogger<PropertyController> logger)
         {
             _property = property;
+            _logger = logger;
+        }
+
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAllAsync()
+        {
+            var result = await _property.GetAllAsync();
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
         }
 
         [HttpGet("GetById")]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
-            var pro = await _property.GetByIdAsync(id);
-            return Ok(pro);
+            var result = await _property.GetByIdAsync(id);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
         }
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAllAsync()
-        {
-            var allpro =await _property.GetAllAsync();
-            return Ok(allpro);
-        }
-        [HttpPost("AddProperty")]
 
-        public async Task<IActionResult> AddPropertyAsync([FromForm]Propertydto propertydto)
+        [HttpGet("FilterProperty")]
+        public async Task<IActionResult> FilterAsync([FromQuery] PropertyQueryDto query)
         {
-            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var add = await _property.AddPropertyAsync(propertydto, userId);
-            return Ok(add);
+            
+            var result = await _property.FilterProperty(query);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+
         }
-        [HttpPut("UpdateProperty")]
-        public async Task<IActionResult> UpdateProperyAsync([FromForm]Propertydto propertydto, Guid id)
+
+        [Authorize]
+        [HttpPost("AddProperty")]
+        public async Task<IActionResult> AddPropertyAsync([FromForm] PropertyDto propertydto)
         {
-            await _property.UpdatePropertyAsync(propertydto, id);
-            return Ok("Property Updated Successfully");
+            var userIdClaim = User.FindFirst("Id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized("User ID claim is missing from token.");
+            }
+            var userId = Guid.Parse(userIdClaim);
+
+            var result = await _property.AddPropertyAsync(propertydto, userId);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else if (result.StatusCode == 406)
+            {
+                return StatusCode(StatusCodes.Status406NotAcceptable, result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+
+        [HttpPut("UpdateProperty")]
+        public async Task<IActionResult> UpdateProperyAsync([FromForm]PropertyDto propertydto, Guid id)
+        {
+            var result = await _property.UpdatePropertyAsync(propertydto, id);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
         }
         [HttpDelete("Delete")]
         public async Task<IActionResult> DeletePropertyAsync(Guid id)
         {
-            var pro = await _property.DeletePropertyAsync(id);
-            return Ok(pro);
+            var result = await _property.DeletePropertyAsync(id);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
         }
     }
 }

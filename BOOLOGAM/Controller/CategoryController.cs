@@ -1,7 +1,9 @@
+using System.Text.RegularExpressions;
 using BOOLOG.Application.Dto.PropertyDto;
 using BOOLOG.Application.Interfaces.ServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Nest;
 
 namespace BOOLOG.API.Controller
 {
@@ -15,42 +17,94 @@ namespace BOOLOG.API.Controller
         {
             _category = category;
         }
-        [Authorize(Roles = "User")]
+        
         [HttpGet("GetAllCategory")]
         public async Task<IActionResult> GetAllCategory()
         {
-            var all = await _category.GetAllCategoryAsync();
-            return Ok(all);
+            var result = await _category.GetAllCategoryAsync();
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
         }
-        [Authorize(Roles = "User")]
-        [HttpGet]
-        public async Task<IActionResult> GetByCategory(string name)
+        
+        [HttpGet("GetByCategoryName")]
+        public async Task<IActionResult> GetByCategory(Guid Id)
         {
             
-            var cat = await _category.GetByCategoryAsync(name);
-            return Ok(cat);
+            var result = await _category.GetCategoryByIdAsync(Id);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
         }
-        [Authorize(Roles = "User")]
+        
         [HttpPost("AddCategory")]
-        public async Task<IActionResult> AddCategory(CategoryDto name)
+        public async Task<IActionResult> AddCategory([FromForm]string name)
         {
-            var cat = await _category.AddCategoryAsync(name);
-            return Ok(cat);
+            var regex = new Regex(@"^[a-zA-Z][a-zA-Z\s]*$");
+            if (!regex.IsMatch(name))
+            {
+                return BadRequest("Name must start with a letter and contain only letters and spaces.");
+            }
+            var result = await _category.AddCategoryAsync(name);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
         }
-        [Authorize(Roles = "User")]
+        
         [HttpPut("UpdateCategory")]
-        public async Task<IActionResult> UpdateCategory(Guid id, string CategoryName)
+        public async Task<IActionResult> UpdateCategory([FromForm]CategoryDto dto)
         {
             
-            var cat = await _category.UpdateCategoryAsync(id, CategoryName);
-            return Ok(cat);
+            var result = await _category.UpdateCategoryAsync(dto);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
         }
-        [Authorize(Roles = "User")]
+        
         [HttpDelete("DeleteCategory")]
         public async Task<IActionResult> DeleteCategory([FromForm] Guid id)
         {
-            var cat = await _category.DeleteCategoryAsync(id);
-            return Ok(cat);
+            var result = await _category.DeleteCategoryAsync(id);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
         }
     }
 }

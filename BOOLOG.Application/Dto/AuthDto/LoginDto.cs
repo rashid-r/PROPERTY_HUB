@@ -15,3 +15,4 @@ namespace BOOLOG.Application.Dto.AuthDto
         public string Password { get; set; }
     }
 }
+

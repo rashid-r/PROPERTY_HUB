@@ -3,7 +3,7 @@ using BOOLOGAM.Infrastructure.Db_Context;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace BOOLOG.Infrastructure.Repository.Repository
+namespace BOOLOG.Infrastructure.Repository
 {
     public class Repository<T> : IRepository<T> where T : class
     {
@@ -54,8 +54,7 @@ namespace BOOLOG.Infrastructure.Repository.Repository
         public async Task UpdateAsync(T entity)
         {
             try
-            {
-                
+            {   
                 _dbSet.Update(entity);
                 await _dbContext.SaveChangesAsync();
             }

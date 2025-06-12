@@ -22,7 +22,7 @@ namespace BOOLOG.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BOOLOG.Domain.Model.CategoryEntity", b =>
+            modelBuilder.Entity("BOOLOG.Domain.Model.Category", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -35,21 +35,59 @@ namespace BOOLOG.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CategoryModel");
+                    b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("BOOLOG.Domain.Model.PropertyEntity", b =>
+            modelBuilder.Entity("BOOLOG.Domain.Model.Feedback", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CategoryEntityId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CategoryName")
+                    b.Property<string>("Comment")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PropertyFeedbacks");
+                });
+
+            modelBuilder.Entity("BOOLOG.Domain.Model.Location", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LocationName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Locations");
+                });
+
+            modelBuilder.Entity("BOOLOG.Domain.Model.Property", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -58,45 +96,160 @@ namespace BOOLOG.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("Price")
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<int>("PropertyPurpose")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserEntityId")
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryEntityId");
+                    b.HasIndex("CategoryId");
 
-                    b.HasIndex("UserEntityId");
+                    b.HasIndex("LocationId");
 
-                    b.ToTable("PropertyModel");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Properties");
                 });
 
-            modelBuilder.Entity("BOOLOGAM.Domain.Model.UserEntity", b =>
+            modelBuilder.Entity("BOOLOG.Domain.Model.RazorPay", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RazorPay");
+                });
+
+            modelBuilder.Entity("BOOLOG.Domain.Model.UserProfile", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("BlockedUser")
+                    b.Property<long>("AadhaarIdNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Address")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KycStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("PostalCode")
+                        .HasColumnType("float");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserProfiles");
+                });
+
+            modelBuilder.Entity("BOOLOG.Domain.Model.WishList", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("WishLists");
+                });
+
+            modelBuilder.Entity("BOOLOGAM.Domain.Model.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Contact")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsBlocked")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -112,36 +265,77 @@ namespace BOOLOG.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserModel");
+                    b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BOOLOG.Domain.Model.PropertyEntity", b =>
+            modelBuilder.Entity("BOOLOG.Domain.Model.Property", b =>
                 {
-                    b.HasOne("BOOLOG.Domain.Model.CategoryEntity", "categoryEntities")
-                        .WithMany("propertyEntities")
-                        .HasForeignKey("CategoryEntityId")
+                    b.HasOne("BOOLOG.Domain.Model.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BOOLOGAM.Domain.Model.UserEntity", "userEntities")
-                        .WithMany("propertyEntries")
-                        .HasForeignKey("UserEntityId")
+                    b.HasOne("BOOLOG.Domain.Model.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BOOLOGAM.Domain.Model.User", "User")
+                        .WithMany("Properties")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("categoryEntities");
+                    b.Navigation("Category");
 
-                    b.Navigation("userEntities");
+                    b.Navigation("Location");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BOOLOG.Domain.Model.CategoryEntity", b =>
+            modelBuilder.Entity("BOOLOG.Domain.Model.UserProfile", b =>
                 {
-                    b.Navigation("propertyEntities");
+                    b.HasOne("BOOLOGAM.Domain.Model.User", null)
+                        .WithOne("UserProfile")
+                        .HasForeignKey("BOOLOG.Domain.Model.UserProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("BOOLOGAM.Domain.Model.UserEntity", b =>
+            modelBuilder.Entity("BOOLOG.Domain.Model.WishList", b =>
                 {
-                    b.Navigation("propertyEntries");
+                    b.HasOne("BOOLOG.Domain.Model.Property", "property")
+                        .WithMany("WishLists")
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BOOLOGAM.Domain.Model.User", "user")
+                        .WithMany("WishLists")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("property");
+
+                    b.Navigation("user");
+                });
+
+            modelBuilder.Entity("BOOLOG.Domain.Model.Property", b =>
+                {
+                    b.Navigation("WishLists");
+                });
+
+            modelBuilder.Entity("BOOLOGAM.Domain.Model.User", b =>
+                {
+                    b.Navigation("Properties");
+
+                    b.Navigation("UserProfile")
+                        .IsRequired();
+
+                    b.Navigation("WishLists");
                 });
 #pragma warning restore 612, 618
         }

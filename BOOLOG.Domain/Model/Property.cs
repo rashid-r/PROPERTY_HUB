@@ -4,23 +4,22 @@ using BOOLOGAM.Domain.Model;
 
 namespace BOOLOG.Domain.Model
 {
-    public class PropertyEntity
+    public class Property
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Title { get; set; }
-        public string CategoryName { get; set; }
         public string Description { get; set; }
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public PropertyType PropertyPurpose { get; set; } //rend,buy,lease
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public PropertyTypes Type { get; set; } //rend,buy,lease
         public PropertyStatus Status { get; set; } = PropertyStatus.Available;
-        public Decimal Price { get; set; }
-        //public Guid LocationId { get; set; }
+        public decimal Price { get; set; }
         public DateTime CreatedDate { get; set; }
-        public Guid UserEntityId { get; set; }
-        public virtual UserEntity userEntities { get; set; }
-        public Guid CategoryEntityId { get; set; } 
-        public virtual CategoryEntity categoryEntities { get; set; }
+        public Guid UserId { get; set; }
+        public Guid CategoryId { get; set; } 
+        public Guid LocationId { get; set; }
+        public virtual User User { get; set; }
+        public virtual Category Category { get; set; }
+        public virtual Location Location { get; set; }
+        public virtual ICollection<WishList> WishLists { get; set; }
     }
 }
 public enum PropertyStatus
@@ -34,11 +33,9 @@ public enum PropertyStatus
     [Display(Name = "Sold")]
     Sold,
     [Display(Name = "Leased")]
-    Leased,
-    [Display(Name = "Pending")]
-    Pending,
+    Leased,     
 }
-public enum PropertyType
+public enum PropertyTypes
 {
     [Display(Name = "For Rent")]
     Rent,

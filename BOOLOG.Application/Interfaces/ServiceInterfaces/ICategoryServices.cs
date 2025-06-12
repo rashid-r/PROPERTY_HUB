@@ -6,11 +6,11 @@ namespace BOOLOG.Application.Interfaces.ServiceInterfaces
 {
     public interface ICategoryServices
     {
-        Task<IEnumerable<CategoryEntity>> GetAllCategoryAsync();
-        Task<CategoryEntity> GetByCategoryAsync(string name);
-        Task<ResponseDto> AddCategoryAsync(CategoryDto name);
-        Task<ResponseDto> UpdateCategoryAsync(Guid id, string CategoryName);
-        Task<ResponseDto> DeleteCategoryAsync(Guid id);
+        Task<ApiResponse<List<CategoryDto>>> GetAllCategoryAsync();
+        Task<ApiResponse<CategoryDto>> GetCategoryByIdAsync(Guid id);
+        Task<ApiResponse<string>> AddCategoryAsync(string name);
+        Task<ApiResponse<CategoryDto>> UpdateCategoryAsync(CategoryDto dto);
+        Task<ApiResponse<string>> DeleteCategoryAsync(Guid id);
 
     }
 }
